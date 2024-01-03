@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Users {
+  id Int @id @default(autoincrement())
+  username String @db.VarChar(100) @unique
+  password String @db.VarChar(100)
+  token String @db.VarChar(255)
+  role Role @default(user)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  pemagang Pemagangs?
+  mentor Mentors?
+  @@map("users")
+}
+
+model Pemagangs {
+  id Int @id @default(autoincrement())
+  user_id Int @unique
+  divisi_id Int
+  name String @db.VarChar(100)
+  place_origin String @db.VarChar(100)
+  gender Gender
+  start_at DateTime @db.DateTime()
+  end_at DateTime @db.DateTime()
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+
+  presences Presences[]
+  logbook Logbooks[]
+  notifications Notifications[]
+  divisi Divisions @relation(fields: [divisi_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id])
+  @@map("pemagangs")
+}
+
+model Mentors {
+  id Int @id @default(autoincrement())
+  user_id Int @unique
+  name String @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user Users @relation(fields: [user_id], references: [id])
+  @@map("mentors")
+}
+
+model Divisions {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pemagang Pemagangs[]
+
+  @@map("divisions")
+}
+
+model Presences {
+  id Int @id @default(autoincrement())
+  status Status?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pemagang_id Int
+
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  @@map("presences")
+}
+
+
+model Notifications {
+  id Int @id @default(autoincrement())
+  pemagang_id Int
+  message String @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  @@map("notifications")
+}
+
+model Logbooks {
+  id Int @id @default(autoincrement())
+  pemagang_id Int
+  logbook_category_id Int
+  logbook_detail_id Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  logbookCategory LogbookCategory @relation(fields: [logbook_category_id], references: [id])
+  logbookDetail LogbookDetail @relation(fields: [logbook_detail_id], references: [id])
+  @@map("logbooks")
+}
+
+model LogbookDetail {
+  id Int @id @default(autoincrement())
+  activity String @db.VarChar(255)
+  statuses String @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  logbook Logbooks[]
+  @@map("logbook_detail")
+}
+
+model LogbookCategory {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  logbook Logbooks[]
+  @@map("logbook_category")
+}
+
+model Menu {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  role Role @default(user)
+  slug String @db.VarChar(100)
+  icon String @db.VarChar(100)
+  url String @db.VarChar(100)
+  is_active Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("menu")
+}
+
+enum Status {
+  Hadir
+  Sakit
+  Ijin
+  Alpa
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum Gender {
+  lakilaki
+  perempuan
+}
