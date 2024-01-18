@@ -98,6 +98,12 @@ export default function Page() {
           status: "Revisi",
           information: values?.information,
         });
+        const response2 = await axios.post(`/api/notifications`, {
+          send: logbook?.id,
+          receive: logbook?.id,
+          is_read: false,
+          message: `Mentor Kamu memberikan catatan revisi!`,
+        });
         return response.data;
       }
     } catch (error) {
@@ -166,9 +172,20 @@ export default function Page() {
     );
   };
 
-  async function handleUpdate(id: string, data: any) {
+  async function handleUpdate(report: any, data: any) {
     try {
-      const response = await axios.put(`/api/reports/weekly/${id}`, data);
+      const response = await axios.put(
+        `/api/reports/weekly/${report?.id}`,
+        data
+      );
+      const response2 = await axios.post(`/api/notifications`, {
+        send: logbook?.id,
+        receive: logbook?.id,
+        is_read: false,
+        message: `Laporan di ${report?.week} (${dateMonth(
+          report?.start_date
+        )} - ${dateMonth(report?.end_date)}) telah disetujui mentor!`,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -268,7 +285,7 @@ export default function Page() {
                       </Dialog>
                       <Button
                         onClick={() =>
-                          handleUpdate(report?.id, { status: "Approve" })
+                          handleUpdate(report, { status: "Approve" })
                         }
                       >
                         <Check className="h-4 w-4" />

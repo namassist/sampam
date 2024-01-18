@@ -4,18 +4,13 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const id = url.searchParams.get("pemagang_id") || "";
-    let notifications;
+    const receive = url.searchParams.get("receive") || null;
 
-    if (!id) {
-      notifications = await db.notifications.findMany();
-    } else {
-      notifications = await db.notifications.findMany({
-        where: {
-          pemagang_id: id,
-        },
-      });
-    }
+    const notifications = await db.notifications.findMany({
+      where: {
+        receive,
+      },
+    });
 
     return NextResponse.json({ status: 200, data: notifications });
   } catch (error) {
@@ -28,12 +23,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { pemagang_id, message } = await req.json();
+    const { send, receive, message } = await req.json();
 
     const createdNotification = await db.notifications.create({
       data: {
-        pemagang_id,
+        send,
+        receive,
         message,
+        is_read: false,
       },
     });
 

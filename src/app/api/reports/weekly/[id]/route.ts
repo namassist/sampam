@@ -36,6 +36,11 @@ export async function GET(
         week: true,
         activity: true,
         pemagang_id: true,
+        pemagang: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
@@ -51,6 +56,7 @@ export async function GET(
 
     const response = {
       id: weeklyReport?.id,
+      name: weeklyReport?.pemagang?.name,
       status: weeklyReport?.status,
       start_date: weeklyReport?.start_date,
       end_date: weeklyReport?.end_date,

@@ -17,7 +17,9 @@ const Hello: React.FC<HelloProps> = ({ username, message }) => {
       />
       <div className="ml-6">
         <h3 className="text-lg font-semibold capitalize">Hello, {username}</h3>
-        <p className="mt-2 text-sm font-normal capitalize">{message}</p>
+        <p className="mt-2 text-sm font-normal capitalize text-red-500">
+          {message}
+        </p>
       </div>
     </div>
   );

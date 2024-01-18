@@ -41,6 +41,17 @@ async function getTotalLogbook() {
   };
 }
 
+async function getNotifications() {
+  const response = await db.notifications.count({
+    where: {
+      receive: null,
+      is_read: false,
+    },
+  });
+
+  return response;
+}
+
 async function weeklyLogbook(start: any, end: any) {
   try {
     const res = await axios.get(
@@ -72,6 +83,7 @@ export default async function Dashboard() {
   const totalUser = await getTotalUser();
   const totalDivisi = await getTotalDivisi();
   const totalLogbook = await getTotalLogbook();
+  const notifications = await getNotifications();
 
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -90,6 +102,7 @@ export default async function Dashboard() {
 
   const getLogbook = weeklyLogbook(start, end);
   const getPresences = presencesLogbook(start, end);
+
   const [logbook, presences] = await Promise.all([getLogbook, getPresences]);
 
   const handleType = (activity: string) => {
@@ -117,7 +130,11 @@ export default async function Dashboard() {
       </div>
       <Hello
         username={user?.user?.username || ""}
-        message="Selamat Datang kembali, senang bisa bertemu lagi"
+        message={
+          notifications !== 0
+            ? `Kamu punya ${notifications} notifikasi yang belum dibaca!`
+            : "have a good day, sir!"
+        }
       />
       <div className="w-full flex flex-col lg:flex-row gap-4">
         <BasicCard

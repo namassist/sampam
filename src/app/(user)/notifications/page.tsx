@@ -1,9 +1,28 @@
+import Alerts from "@/components/alerts";
 import Breadcrumbs from "@/components/breadcrumbs";
 import AuthLayout from "@/components/layouts/AuthLayout";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BiSolidBell } from "react-icons/bi";
+import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 
-export default function Notifikasi() {
+import { getServerSession } from "next-auth";
+
+async function getNotifications(id: any) {
+  const response = await db.notifications.findMany({
+    where: {
+      receive: id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return response;
+}
+
+export default async function Notifikasi() {
+  const user = await getServerSession(authOptions);
+  const notifications = await getNotifications(user?.user?.id);
+
   return (
     <AuthLayout>
       <div className="flex flex-col items-start p-[18px] bg-white rounded-lg relative my-4">
@@ -11,22 +30,9 @@ export default function Notifikasi() {
         <Breadcrumbs role="user" currentPage="Notifikasi" />
       </div>
       <div className="space-y-2">
-        <Alert>
-          <BiSolidBell className="h-4 w-4" />
-          <AlertTitle>Yeayy!</AlertTitle>
-          <AlertDescription>
-            Laporan Mingguanmu pada tanggal 15-19 Januari 2024 disetujui oleh
-            mentor.
-          </AlertDescription>
-        </Alert>
-        <Alert>
-          <BiSolidBell className="h-4 w-4" />
-          <AlertTitle>Yeay!</AlertTitle>
-          <AlertDescription>
-            Laporan Mingguanmu pada tanggal 15-19 Januari 2024 disetujui oleh
-            mentor.
-          </AlertDescription>
-        </Alert>
+        {notifications?.map((notif) => (
+          <Alerts key={notif?.id} data={notif} />
+        ))}
       </div>
     </AuthLayout>
   );

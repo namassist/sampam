@@ -57,7 +57,6 @@ export default function Login() {
         : null;
     } catch (error) {
       setIsLoading(false);
-      setIsLoading(false);
       console.log(error);
     } finally {
       router.refresh();

@@ -37,7 +37,6 @@ model Pemagangs {
   presences Presences[]
   dailyReports DailyReports[]
   weeklyReports WeeklyReports[]
-  notifications Notifications[]
   divisi Divisions @relation(fields: [divisi_id], references: [id])
   user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("pemagangs")
@@ -77,12 +76,13 @@ model Presences {
 
 model Notifications {
   id String @id @default(uuid())
-  pemagang_id String
+  send String @db.VarChar(255)
+  receive String? @db.VarChar(255)
+  is_read Boolean
   message String @db.VarChar(100)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("notifications")
 }
 

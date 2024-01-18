@@ -39,6 +39,17 @@ async function getPresences(id: any, start: any, end: any) {
   return response;
 }
 
+async function getNotifications(id: any) {
+  const response = await db.notifications.count({
+    where: {
+      receive: id,
+      is_read: false,
+    },
+  });
+
+  return response;
+}
+
 export default async function Dashboard() {
   const user = await getServerSession(authOptions);
 
@@ -56,8 +67,8 @@ export default async function Dashboard() {
   );
 
   const logbook = await getLogbook(user?.user?.id);
+  const notifications = await getNotifications(user?.user?.id);
   const presences = await getPresences(user?.user?.id, startOfWeek, endOfWeek);
-  console.log(presences);
 
   const handleDate = (start: any, end: any) => {
     const today = new Date();
@@ -105,7 +116,11 @@ export default async function Dashboard() {
       </div>
       <Hello
         username={user?.user?.username || ""}
-        message="Jangan Lupa melakukan presensi"
+        message={
+          notifications !== 0
+            ? `Kamu punya ${notifications} notifikasi yang belum dibaca!`
+            : "Jangan Lupa melakukan presensi"
+        }
       />
       <div className="w-full flex flex-col lg:flex-row gap-4 mt-5 text-gray-500">
         <div className="w-full lg:w-4/12 bg-white p-5 rounded-lg shadow-sm">

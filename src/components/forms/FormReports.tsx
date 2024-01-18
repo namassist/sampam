@@ -46,6 +46,14 @@ const FormReports = ({ report, status }: { report: any; status: string }) => {
           status: "Submit",
           activity: data?.activity,
         });
+
+        const response2 = await axios.post(`/api/notifications`, {
+          send: report?.id,
+          receive: null,
+          is_read: false,
+          message: `${report?.name} membuat logbook ${report?.week}`,
+        });
+
         return response.data;
       } else {
         const response = await axios.put(
@@ -66,6 +74,7 @@ const FormReports = ({ report, status }: { report: any; status: string }) => {
       });
     }
   }
+
   return (
     <div className="p-[18px] bg-white rounded-lg shadow-sm flex justify-between items-center w-full lg:w-[calc(50%_-_.75rem)]">
       <Form {...form}>
