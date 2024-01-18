@@ -9,10 +9,9 @@ datasource db {
 
 
 model Users {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   username String @db.VarChar(100) @unique
   password String @db.VarChar(100)
-  token String @db.VarChar(255)
   role Role @default(user)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -23,9 +22,9 @@ model Users {
 }
 
 model Pemagangs {
-  id Int @id @default(autoincrement())
-  user_id Int @unique
-  divisi_id Int
+  id String @id @default(uuid())
+  user_id String @unique
+  divisi_id String
   name String @db.VarChar(100)
   place_origin String @db.VarChar(100)
   gender Gender
@@ -36,26 +35,27 @@ model Pemagangs {
   
 
   presences Presences[]
-  logbook Logbooks[]
+  dailyReports DailyReports[]
+  weeklyReports WeeklyReports[]
   notifications Notifications[]
   divisi Divisions @relation(fields: [divisi_id], references: [id])
-  user Users @relation(fields: [user_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("pemagangs")
 }
 
 model Mentors {
-  id Int @id @default(autoincrement())
-  user_id Int @unique
+  id String @id @default(uuid())
+  user_id String @unique
   name String @db.VarChar(100)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  user Users @relation(fields: [user_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("mentors")
 }
 
 model Divisions {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   name String @db.VarChar(100)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -65,82 +65,80 @@ model Divisions {
 }
 
 model Presences {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   status Status?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  pemagang_id Int
+  pemagang_id String
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("presences")
 }
 
-
 model Notifications {
-  id Int @id @default(autoincrement())
-  pemagang_id Int
+  id String @id @default(uuid())
+  pemagang_id String
   message String @db.VarChar(100)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("notifications")
 }
 
-model Logbooks {
-  id Int @id @default(autoincrement())
-  pemagang_id Int
-  logbook_category_id Int
-  logbook_detail_id Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
-  logbookCategory LogbookCategory @relation(fields: [logbook_category_id], references: [id])
-  logbookDetail LogbookDetail @relation(fields: [logbook_detail_id], references: [id])
-  @@map("logbooks")
-}
-
-model LogbookDetail {
-  id Int @id @default(autoincrement())
+model DailyReports {
+  id String @id @default(uuid())
+  pemagang_id String
+  date DateTime @db.DateTime()
   activity String @db.VarChar(255)
-  statuses String @db.VarChar(255)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  logbook Logbooks[]
-  @@map("logbook_detail")
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
+  @@map("daily_reports")
 }
 
-model LogbookCategory {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(255)
+model WeeklyReports {
+  id String @id @default(uuid())
+  pemagang_id String
+  status Statuses?
+  start_date DateTime @db.DateTime()
+  end_date DateTime @db.DateTime()
+  week String @db.VarChar(100)
+  activity String @db.VarChar(255)
+  information String? @db.VarChar(255)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  logbook Logbooks[]
-  @@map("logbook_category")
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
+  @@map("weekly_reports")
 }
 
 model Menu {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   name String @db.VarChar(255)
   role Role @default(user)
   slug String @db.VarChar(100)
   icon String @db.VarChar(100)
   url String @db.VarChar(100)
+  order Int
   is_active Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@map("menu")
+  @@map("menus")
 }
 
 enum Status {
   Hadir
   Sakit
   Ijin
-  Alpa
+}
+
+enum Statuses {
+  Submit
+  Revisi
+  Approve
 }
 
 enum Role {
