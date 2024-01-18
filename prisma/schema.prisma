@@ -39,7 +39,7 @@ model Pemagangs {
   weeklyReports WeeklyReports[]
   notifications Notifications[]
   divisi Divisions @relation(fields: [divisi_id], references: [id])
-  user Users @relation(fields: [user_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("pemagangs")
 }
 
@@ -50,7 +50,7 @@ model Mentors {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  user Users @relation(fields: [user_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
   @@map("mentors")
 }
 
@@ -71,10 +71,9 @@ model Presences {
   updatedAt DateTime  @updatedAt
   pemagang_id String
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("presences")
 }
-
 
 model Notifications {
   id String @id @default(uuid())
@@ -83,7 +82,7 @@ model Notifications {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("notifications")
 }
 
@@ -95,7 +94,7 @@ model DailyReports {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("daily_reports")
 }
 
@@ -107,10 +106,11 @@ model WeeklyReports {
   end_date DateTime @db.DateTime()
   week String @db.VarChar(100)
   activity String @db.VarChar(255)
+  information String? @db.VarChar(255)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id])
+  pemagang Pemagangs @relation(fields: [pemagang_id], references: [id], onDelete: Cascade)
   @@map("weekly_reports")
 }
 
@@ -136,9 +136,9 @@ enum Status {
 }
 
 enum Statuses {
-  Review
-  Revision
-  Approval
+  Submit
+  Revisi
+  Approve
 }
 
 enum Role {

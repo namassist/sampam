@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { users, menus } = require("./data.js");
+const { users, menus, divisions } = require("./data.js");
 
 const prisma = new PrismaClient();
 
@@ -7,6 +7,7 @@ const load = async () => {
   try {
     const totalMenu = await prisma.menu.count();
     const totalUser = await prisma.users.count();
+    const totalDivisi = await prisma.users.count();
 
     if (totalMenu !== 0) {
       // delete
@@ -16,8 +17,14 @@ const load = async () => {
 
     if (totalUser !== 0) {
       // delete
-      await prisma.user.deleteMany();
+      await prisma.users.deleteMany();
       console.log("Deleted records in users table");
+    }
+
+    if (totalDivisi !== 0) {
+      // delete
+      await prisma.divisions.deleteMany();
+      console.log("Deleted records in divisi table");
     }
 
     // create
@@ -30,6 +37,11 @@ const load = async () => {
       data: users,
     });
     console.log("Added users data");
+
+    await prisma.divisions.createMany({
+      data: divisions,
+    });
+    console.log("Added divisions data");
   } catch (e) {
     console.error(e);
     process.exit(1);

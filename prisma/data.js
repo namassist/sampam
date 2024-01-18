@@ -11,6 +11,18 @@ const users = [
   },
 ];
 
+const divisions = [
+  {
+    name: "it",
+  },
+  {
+    name: "admin",
+  },
+  {
+    name: "finance",
+  },
+];
+
 const menus = [
   {
     name: "notifikasi",
@@ -114,4 +126,4 @@ const menus = [
   },
 ];
 
-module.exports = { users, menus };
+module.exports = { users, menus, divisions };
