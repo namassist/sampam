@@ -56,6 +56,8 @@ export default function Login() {
           })
         : null;
     } catch (error) {
+      setIsLoading(false);
+      setIsLoading(false);
       console.log(error);
     } finally {
       router.refresh();
@@ -63,8 +65,9 @@ export default function Login() {
       session?.user?.role === "admin"
         ? router.push("/admin/dashboard")
         : router.push("/dashboard");
+      setIsLoading(false);
+
       if (session) {
-        setIsLoading(false);
         toast({
           className: "text-green-600",
           title: `Login Berhasil`,

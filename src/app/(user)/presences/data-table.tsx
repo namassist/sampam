@@ -51,6 +51,7 @@ import {
 import { BiSolidBookContent } from "react-icons/bi";
 import { revalidatePath } from "next/cache";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -68,6 +69,7 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue> & { id: any }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -106,14 +108,28 @@ export function DataTable<TData, TValue>({
         pemagang_id: id,
         status: values?.status,
       });
-      return response.data;
+
+      if (response?.data?.status === 409) {
+        toast({
+          title: "409 Error",
+          description: response?.data?.message,
+        });
+      }
+
+      if (response?.data?.status === 200) {
+        toast({
+          title: "Sukses",
+          description: "Berhasil melakukan presensi hari ini",
+        });
+        return response.data;
+      }
     } catch (error) {
       console.error("Error creating item:", error);
       throw error;
     } finally {
       router.refresh();
-      setIsLoading(false);
       setOpen(false);
+      setIsLoading(false);
     }
   }
 

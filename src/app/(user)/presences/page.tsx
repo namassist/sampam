@@ -6,6 +6,7 @@ import { columns, Presences } from "./columns";
 import Breadcrumbs from "@/components/breadcrumbs";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import { authOptions } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 async function getData(id: any): Promise<Presences[]> {
   const response = await db.presences.findMany({
@@ -22,6 +23,7 @@ async function getData(id: any): Promise<Presences[]> {
     },
   });
 
+  revalidatePath("/presences");
   return response;
 }
 
