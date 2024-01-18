@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import * as z from "zod";
 import {
   Dialog,
@@ -59,9 +61,12 @@ const formSchema = z.object({
 });
 
 export function DataTable<TData, TValue>({
+  id,
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue> & { id: any }) {
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -90,14 +95,25 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await axios.post("/api/presences", {
+        pemagang_id: id,
+        status: values?.status,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating item:", error);
+      throw error;
+    } finally {
+      router.refresh();
+    }
   }
 
   return (
     <div>
       <div className="py-4">
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="bg-slate-200">
               <BiSolidBookContent className="w-4 h-4 mr-2" /> Presensi Harian

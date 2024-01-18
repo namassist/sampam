@@ -1,12 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import { useForm } from "react-hook-form";
 import * as z from "zod";
+import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -40,15 +38,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -57,6 +50,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -69,6 +63,7 @@ const formSchema = z.object({
   slug: z.string().min(2),
   icon: z.string().min(2),
   url: z.string().min(2),
+  order: z.number(),
   is_active: z.number(),
 });
 
@@ -76,6 +71,9 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -104,12 +102,27 @@ export function DataTable<TData, TValue>({
       slug: "",
       icon: "",
       url: "",
-      is_active: 0,
+      order: 7,
+      is_active: 1,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await axios.post("/api/menus", values);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating item:", error);
+      throw error;
+    } finally {
+      toast({
+        className: "text-green-600 bg-gray-100",
+        title: "Sukses",
+        description: "Berhasil menambah data!",
+      });
+      setOpen(false);
+      router.refresh();
+    }
   }
 
   return (
@@ -123,7 +136,7 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
               <PlusCircle className="w-4 h-4 mr-2" /> Tambah

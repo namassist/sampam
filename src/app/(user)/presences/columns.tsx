@@ -4,13 +4,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import React from "react";
 
-export type Menu = {
+export type Presences = {
   id: string;
-  status: "Hadir" | "Izin" | "Sakit";
-  created_at: string;
+  status: "Hadir" | "Ijin" | "Sakit" | null;
+  createdAt: Date;
 };
 
-export const columns: ColumnDef<Menu>[] = [
+export const columns: ColumnDef<Presences>[] = [
   {
     accessorKey: "number",
     header: "No",
@@ -19,12 +19,11 @@ export const columns: ColumnDef<Menu>[] = [
     },
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "createdAt",
     header: "Tanggal",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("created_at"));
+      const date = new Date(row.getValue("createdAt"));
       let options = { day: "2-digit", month: "long", year: "numeric" } as const;
-
       const formatted = date.toLocaleDateString("id-ID", options);
 
       return formatted;
@@ -34,7 +33,7 @@ export const columns: ColumnDef<Menu>[] = [
     accessorKey: "waktu",
     header: "Waktu Presensi",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("created_at"));
+      const date = new Date(row.getValue("createdAt"));
       const formatted = date.toLocaleTimeString("id-ID", {
         hour: "2-digit",
         minute: "2-digit",

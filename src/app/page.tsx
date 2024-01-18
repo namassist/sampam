@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
+import { ReloadIcon } from "@radix-ui/react-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -15,8 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const formSchema = z.object({
   username: z.string().min(6),
@@ -24,7 +27,10 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+  const { toast } = useToast();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,20 +40,34 @@ export default function Login() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const signInData = await signIn("credentials", {
-      username: values.username,
-      password: values.password,
-      redirect: false,
-    });
+    try {
+      setIsLoading(true);
+      const signInData = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false,
+      });
 
-    if (signInData?.error) {
-      console.log(signInData.error);
-    } else {
+      signInData?.error
+        ? toast({
+            className: "text-red-600",
+            title: `Error ${signInData?.status}`,
+            description: `${signInData?.error}`,
+          })
+        : null;
+    } catch (error) {
+      console.log(error);
+    } finally {
       router.refresh();
       const session = await getSession();
+      toast({
+        className: "text-green-600",
+        title: `Login Berhasil`,
+      });
       session?.user?.role === "admin"
         ? router.push("/admin/dashboard")
         : router.push("/dashboard");
+      setIsLoading(false);
     }
   };
 
@@ -106,9 +126,16 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="sm" className="w-full">
-                Masuk
-              </Button>
+              {isLoading ? (
+                <Button className="w-full" disabled>
+                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Sedang Login ..
+                </Button>
+              ) : (
+                <Button type="submit" size="sm" className="w-full">
+                  Masuk
+                </Button>
+              )}
             </form>
           </Form>
           <p className="text-xs text-gray-500 text-center mt-10 capitalize">

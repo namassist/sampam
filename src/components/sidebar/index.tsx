@@ -3,27 +3,51 @@
 import Link from "next/link";
 import Image from "next/image";
 import * as BIcon from "react-icons/bi";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePathname } from "next/navigation";
 import { getMenus } from "@/app/actions/menus";
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 interface Sidebar {
   collapsed: boolean;
   setSidebarCollapsed: (value: boolean) => void;
 }
 
+export type Menu = {
+  id: string;
+  name: string;
+  role: "admin" | "user";
+  url: string;
+  icon: string;
+  slug: string;
+  is_active: number;
+};
+
 const Sidebar: React.FC<Sidebar> = ({ collapsed, setSidebarCollapsed }) => {
   const params = usePathname();
+  const { data: session } = useSession();
   const [menus, setMenus] = useState<Menu[]>([]);
-
-  const fetchData = async () => {
-    const menusData = await getMenus();
-    setMenus(menusData);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        if (session?.user?.role) {
+          const menusData = await getMenus(session.user.role);
+          setMenus(menusData);
+        }
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (session) {
+      fetchData();
+    }
+  }, [session]);
 
   return (
     <aside
@@ -57,28 +81,38 @@ const Sidebar: React.FC<Sidebar> = ({ collapsed, setSidebarCollapsed }) => {
             </button>
           )}
         </div>
-        <ul className="space-y-4 text-sm font-medium">
-          {menus?.map((menu) => {
-            const IconComponent = BIcon[menu.icon as keyof typeof BIcon];
-            return (
-              <li key={menu?.id}>
-                <Link
-                  href={menu?.url}
-                  className={`${
-                    params === menu.url ? "bg-slate-200" : ""
-                  } flex justify-center items-center rounded-lg p-3 text-slate-900 hover:bg-slate-100`}
-                >
-                  {IconComponent && <IconComponent size={20} />}
-                  {collapsed && (
-                    <span className="ml-3 flex-1 whitespace-nowrap capitalize transition-all duration-300 ease-in-out">
-                      {menu?.name}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {!isLoading ? (
+          <ul className="space-y-4 text-sm font-medium">
+            {menus?.map((menu) => {
+              const IconComponent = BIcon[menu.icon as keyof typeof BIcon];
+              return (
+                <li key={menu?.id}>
+                  <Link
+                    href={menu?.url}
+                    className={`${
+                      params.startsWith(menu.url) ? "bg-slate-200" : ""
+                    } flex justify-center items-center rounded-lg p-3 text-slate-900 hover:bg-slate-100`}
+                  >
+                    {IconComponent && <IconComponent size={20} />}
+                    {collapsed && (
+                      <span className="ml-3 flex-1 whitespace-nowrap capitalize transition-all duration-300 ease-in-out">
+                        {menu?.name}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

@@ -1,6 +1,8 @@
+import "../styles/globals.css";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
-import "../styles/globals.css";
+import Provider from "@/components/Provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
@@ -19,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${open_sans.className} bg-[#F2F2F4]`}>{children}</body>
+      <body className={`${open_sans.className} bg-[#F2F2F4]`}>
+        <Provider>{children}</Provider>
+        <Toaster />
+      </body>
     </html>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilLine, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
+import axios from "axios";
+import Actions from "@/components/actions";
 
 export type Menu = {
   id: string;
@@ -60,26 +61,7 @@ export const columns: ColumnDef<Menu>[] = [
     header: "Aksi",
     cell: ({ row }) => {
       const user = row.original;
-      return (
-        <div className="flex flex-col lg:flex-row gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => console.log(user.id)}
-            className="cursor-pointer"
-          >
-            <PencilLine className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => console.log(user.id)}
-            className="cursor-pointer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      );
+      return <Actions id={user.id} endpoint="/api/menus" />;
     },
   },
 ];

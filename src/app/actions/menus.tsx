@@ -1,10 +1,10 @@
 "use server";
 import { db } from "@/lib/db";
 
-export async function getMenus() {
+export async function getMenus(r: any) {
   const menus = await db.menu.findMany({
     where: {
-      role: "user",
+      role: r,
       is_active: 1,
     },
     orderBy: {

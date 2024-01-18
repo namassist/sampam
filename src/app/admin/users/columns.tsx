@@ -3,15 +3,16 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { PencilLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Actions from "@/components/actions";
 
 export type User = {
   id: string;
   name: string;
-  asal: string;
+  place_origin: string;
   divisi: string;
   gender: "lakilaki" | "perempuan";
-  start_at: string;
-  end_at: string;
+  start_at: Date;
+  end_at: Date;
 };
 
 export const columns: ColumnDef<User>[] = [
@@ -31,7 +32,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Divisi",
   },
   {
-    accessorKey: "asal",
+    accessorKey: "place_origin",
     header: "Asal",
   },
   {
@@ -67,26 +68,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Aksi",
     cell: ({ row }) => {
       const user = row.original;
-      return (
-        <div className="flex flex-col lg:flex-row gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => console.log(user.id)}
-            className="cursor-pointer"
-          >
-            <PencilLine className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => console.log(user.id)}
-            className="cursor-pointer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      );
+      return <Actions id={user.id} endpoint="/api/pemagangs" />;
     },
   },
 ];

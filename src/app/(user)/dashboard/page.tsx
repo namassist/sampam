@@ -16,7 +16,7 @@ export default function Dashboard() {
     <AuthLayout>
       <div className="flex flex-col items-start p-[18px] bg-white rounded-lg relative my-4">
         <h1 className="text-lg font-medium">Dashboard</h1>
-        <Breadcrumbs role="Admin" currentPage="Dashboard" />
+        <Breadcrumbs role="user" currentPage="Dashboard" />
       </div>
       <Hello username="anam" message="Jangan Lupa melakukan presensi" />
       <div className="w-full flex flex-col lg:flex-row gap-4 mt-5 text-gray-500">

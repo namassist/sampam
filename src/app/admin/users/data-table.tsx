@@ -4,9 +4,10 @@ import * as React from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CalendarIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -57,18 +58,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  divisi: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 const formSchema = z.object({
   username: z.string().min(6).max(50),
   name: z.string().min(2),
   place_origin: z.string().min(2),
-  gender: z.string().min(8),
-  divisi_id: z.number(),
+  gender: z.string().min(1),
+  divisi_id: z.string().min(1),
   start_at: z.coerce.date(),
   end_at: z.coerce.date(),
 });
@@ -76,7 +83,11 @@ const formSchema = z.object({
 export function DataTable<TData, TValue>({
   columns,
   data,
+  divisi,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -104,14 +115,28 @@ export function DataTable<TData, TValue>({
       name: "",
       place_origin: "",
       gender: "",
-      divisi_id: 0,
+      divisi_id: "",
       start_at: new Date(),
       end_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await axios.post("/api/pemagangs", values);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating item:", error);
+      throw error;
+    } finally {
+      toast({
+        className: "text-green-600 bg-gray-100",
+        title: "Sukses",
+        description: "Berhasil menambah data!",
+      });
+      setOpen(false);
+      router.refresh();
+    }
   }
 
   return (
@@ -125,7 +150,7 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
               <PlusCircle className="w-4 h-4 mr-2" /> Tambah
@@ -218,7 +243,7 @@ export function DataTable<TData, TValue>({
                   />
                   <FormField
                     control={form.control}
-                    name="gender"
+                    name="divisi_id"
                     render={({ field }) => (
                       <FormItem className="w-full lg:w-1/2">
                         <FormLabel className="text-xs">Divisi</FormLabel>
@@ -227,13 +252,21 @@ export function DataTable<TData, TValue>({
                           defaultValue={field.value}
                         >
                           <FormControl className="text-xs">
-                            <SelectTrigger>
+                            <SelectTrigger className="capitalize">
                               <SelectValue placeholder="Pilih Divisi" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="1">IT</SelectItem>
-                            <SelectItem value="2">Admin</SelectItem>
+                            {divisi &&
+                              divisi.map((item) => (
+                                <SelectItem
+                                  className="capitalize"
+                                  key={item?.id}
+                                  value={item?.id}
+                                >
+                                  {item?.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

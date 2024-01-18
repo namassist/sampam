@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
   },
@@ -26,6 +27,29 @@ export const authOptions: NextAuthOptions = {
 
         const existingUser = await db.users.findUnique({
           where: { username: credentials?.username },
+          select: {
+            id: true,
+            username: true,
+            password: true,
+            role: true,
+            pemagang: {
+              select: {
+                id: true,
+                name: true,
+                divisi: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            mentor: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         });
         if (!existingUser) {
           return null;
@@ -39,11 +63,23 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        return {
-          id: `${existingUser.id}`,
-          username: existingUser.username,
-          role: existingUser.role,
-        };
+        if (existingUser.role === "admin") {
+          return {
+            id: `${existingUser?.mentor?.id}`,
+            user_id: `${existingUser.id}`,
+            username: existingUser.username,
+            name: existingUser?.mentor?.name,
+            role: existingUser.role,
+          };
+        } else {
+          return {
+            id: `${existingUser?.pemagang?.id}`,
+            user_id: `${existingUser.id}`,
+            username: existingUser.username,
+            name: existingUser?.pemagang?.name,
+            role: existingUser.role,
+          };
+        }
       },
     }),
   ],
@@ -52,6 +88,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         return {
           ...token,
+          id: user.id,
+          user_id: user.user_id,
+          name: user.name,
           username: user.username,
           role: user.role,
         };
@@ -65,6 +104,9 @@ export const authOptions: NextAuthOptions = {
           ...session,
           user: {
             ...session.user,
+            id: token.id,
+            user_id: token.user_id,
+            name: token.name,
             username: token.username,
             role: token.role,
           },

@@ -3,18 +3,26 @@
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { LuEye } from "react-icons/lu";
+import { dateString } from "@/lib/utils";
 
 export type User = {
   id: string;
   name: string;
-  asal: string;
+  place_origin: string;
   divisi: string;
   gender: "lakilaki" | "perempuan";
-  start_at: string;
-  end_at: string;
+  start_at: Date;
+  end_at: Date;
 };
 
 export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "number",
+    header: "No",
+    cell: ({ row }) => {
+      return row.index + 1;
+    },
+  },
   {
     accessorKey: "name",
     header: "Nama",
@@ -35,24 +43,16 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "start_at",
     header: "Waktu Mulai Magang",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("start_at"));
-      let options = { day: "2-digit", month: "long", year: "numeric" } as const;
-
-      const formatted = date.toLocaleDateString("id-ID", options);
-
-      return formatted;
+      const date = dateString(row.getValue("start_at"));
+      return date;
     },
   },
   {
     accessorKey: "end_at",
     header: "Waktu Berakhir Magang",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("end_at"));
-      let options = { day: "2-digit", month: "long", year: "numeric" } as const;
-
-      const formatted = date.toLocaleDateString("id-ID", options);
-
-      return formatted;
+      const date = dateString(row.getValue("end_at"));
+      return date;
     },
   },
   {
