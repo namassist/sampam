@@ -4,7 +4,7 @@ import * as React from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import axios from "axios";
@@ -87,6 +87,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -123,19 +124,21 @@ export function DataTable<TData, TValue>({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/pemagangs", values);
       return response.data;
     } catch (error) {
       console.error("Error creating item:", error);
       throw error;
     } finally {
+      router.refresh();
+      setIsLoading(false);
+      setOpen(false);
       toast({
         className: "text-green-600 bg-gray-100",
         title: "Sukses",
         description: "Berhasil menambah data!",
       });
-      setOpen(false);
-      router.refresh();
     }
   }
 
@@ -354,9 +357,16 @@ export function DataTable<TData, TValue>({
                     )}
                   />
                 </div>
-                <Button type="submit" size="sm" className="w-full">
-                  Submit
-                </Button>
+                {isLoading ? (
+                  <Button className="w-full" disabled>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    proses ..
+                  </Button>
+                ) : (
+                  <Button type="submit" size="sm" className="w-full">
+                    Submit
+                  </Button>
+                )}
               </form>
             </Form>
           </DialogContent>

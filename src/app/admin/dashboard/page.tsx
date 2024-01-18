@@ -116,7 +116,7 @@ export default async function Dashboard() {
         <Breadcrumbs role="Admin" currentPage="Dashboard" />
       </div>
       <Hello
-        username="Admin"
+        username={user?.user?.username || ""}
         message="Selamat Datang kembali, senang bisa bertemu lagi"
       />
       <div className="w-full flex flex-col lg:flex-row gap-4">

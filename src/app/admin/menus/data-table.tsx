@@ -51,6 +51,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,6 +75,7 @@ export function DataTable<TData, TValue>({
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -109,19 +111,21 @@ export function DataTable<TData, TValue>({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/menus", values);
       return response.data;
     } catch (error) {
       console.error("Error creating item:", error);
       throw error;
     } finally {
+      router.refresh();
+      setIsLoading(false);
+      setOpen(false);
       toast({
         className: "text-green-600 bg-gray-100",
         title: "Sukses",
         description: "Berhasil menambah data!",
       });
-      setOpen(false);
-      router.refresh();
     }
   }
 
@@ -245,9 +249,16 @@ export function DataTable<TData, TValue>({
                     )}
                   />
                 </div>
-                <Button type="submit" size="sm" className="w-full">
-                  Submit
-                </Button>
+                {isLoading ? (
+                  <Button className="w-full" disabled>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    proses ..
+                  </Button>
+                ) : (
+                  <Button type="submit" size="sm" className="w-full">
+                    Submit
+                  </Button>
+                )}
               </form>
             </Form>
           </DialogContent>

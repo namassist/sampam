@@ -64,13 +64,17 @@ export const columns: ColumnDef<Presences>[] = [
     accessorKey: "keterangan",
     header: "Keterangan",
     cell: ({ row }) => {
-      const status = row.getValue("status") as React.ReactNode;
+      const kehadiran = new Date(row.getValue("createdAt")).toLocaleTimeString(
+        [],
+        { hour: "2-digit", minute: "2-digit" }
+      );
+
       let formatted;
 
-      if (status === "Hadir") {
-        formatted = <Badge className="bg-green-400">Tepat Waktu</Badge>;
-      } else {
+      if (kehadiran > "07:30") {
         formatted = <Badge className="bg-red-400">Terlambat</Badge>;
+      } else {
+        formatted = <Badge className="bg-green-400">Tepat Waktu</Badge>;
       }
 
       return formatted;

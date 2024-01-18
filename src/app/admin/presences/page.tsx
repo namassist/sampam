@@ -3,6 +3,7 @@ import React from "react";
 import { DataTable } from "./data-table";
 import { columns, Presences } from "./columns";
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 async function getData(): Promise<Presences[]> {
   const response = await db.presences.findMany({
@@ -23,6 +24,7 @@ async function getData(): Promise<Presences[]> {
     created_at: p?.createdAt,
   }));
 
+  revalidatePath("/admin/presences");
   return data;
 }
 

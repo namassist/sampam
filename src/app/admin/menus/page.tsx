@@ -4,9 +4,11 @@ import { DataTable } from "./data-table";
 import { columns, Menu } from "./columns";
 import Breadcrumbs from "@/components/breadcrumbs";
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 async function getData(): Promise<Menu[]> {
   const response = await db.menu.findMany();
+  revalidatePath("/admin/menus");
   return response;
 }
 

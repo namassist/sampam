@@ -20,6 +20,12 @@ export default async function Page({ params }: { params: any }) {
   const getLogbooks = getLogbook(id);
   const [logbooks] = await Promise.all([getLogbooks]);
 
+  const allActivitiesValid = logbooks?.daily.every(
+    (dailyEntry: any) =>
+      typeof dailyEntry.activity === "string" &&
+      dailyEntry.activity.trim() !== ""
+  );
+
   return (
     <AuthLayout>
       <div className="flex flex-col items-start p-[18px] bg-white rounded-lg relative my-4 shadow-sm">
@@ -35,6 +41,13 @@ export default async function Page({ params }: { params: any }) {
               status={logbooks?.status}
             />
           ))}
+          {allActivitiesValid && (
+            <FormReports
+              key={logbooks.id}
+              report={logbooks}
+              status={logbooks?.status}
+            />
+          )}
         </div>
       </div>
     </AuthLayout>

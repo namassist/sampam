@@ -49,6 +49,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BiSolidBookContent } from "react-icons/bi";
+import { revalidatePath } from "next/cache";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,6 +69,8 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue> & { id: any }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -97,6 +101,7 @@ export function DataTable<TData, TValue>({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/presences", {
         pemagang_id: id,
         status: values?.status,
@@ -107,6 +112,8 @@ export function DataTable<TData, TValue>({
       throw error;
     } finally {
       router.refresh();
+      setIsLoading(false);
+      setOpen(false);
     }
   }
 
@@ -181,9 +188,16 @@ export function DataTable<TData, TValue>({
                     </FormItem>
                   )}
                 />
-                <Button type="submit" size="sm" className="w-full">
-                  Presensi Sekarang
-                </Button>
+                {isLoading ? (
+                  <Button className="w-full" disabled>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    proses ..
+                  </Button>
+                ) : (
+                  <Button type="submit" size="sm" className="w-full">
+                    Presensi Sekarang
+                  </Button>
+                )}
               </form>
             </Form>
           </DialogContent>

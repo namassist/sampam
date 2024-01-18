@@ -60,14 +60,16 @@ export default function Login() {
     } finally {
       router.refresh();
       const session = await getSession();
-      toast({
-        className: "text-green-600",
-        title: `Login Berhasil`,
-      });
       session?.user?.role === "admin"
         ? router.push("/admin/dashboard")
         : router.push("/dashboard");
-      setIsLoading(false);
+      if (session) {
+        setIsLoading(false);
+        toast({
+          className: "text-green-600",
+          title: `Login Berhasil`,
+        });
+      }
     }
   };
 

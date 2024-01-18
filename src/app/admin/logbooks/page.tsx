@@ -4,6 +4,7 @@ import { DataTable } from "./data-table";
 import { columns, User } from "./columns";
 import Breadcrumbs from "@/components/breadcrumbs";
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 
 async function getData(): Promise<User[]> {
   const response = await db.pemagangs.findMany({
@@ -32,6 +33,7 @@ async function getData(): Promise<User[]> {
     end_at: p.end_at,
   }));
 
+  revalidatePath("/admin/logbooks");
   return pemagangs;
 }
 

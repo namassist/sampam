@@ -18,7 +18,7 @@ export default function Dashboard() {
         <h1 className="text-lg font-medium">Dashboard</h1>
         <Breadcrumbs role="user" currentPage="Dashboard" />
       </div>
-      <Hello username="anam" message="Jangan Lupa melakukan presensi" />
+      <Hello username="user" message="Jangan Lupa melakukan presensi" />
       <div className="w-full flex flex-col lg:flex-row gap-4 mt-5 text-gray-500">
         <div className="w-full lg:w-4/12 bg-white p-5 rounded-lg shadow-sm">
           <div className="flex items-end justify-between">

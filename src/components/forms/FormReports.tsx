@@ -1,6 +1,7 @@
 "use client";
 
 import * as z from "zod";
+import * as React from "react";
 import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { dateString } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useToast } from "../ui/use-toast";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const FormSchema = z.object({
   activity: z.string().min(10, {
@@ -23,6 +27,10 @@ const FormSchema = z.object({
 });
 
 const FormReports = ({ report, status }: { report: any; status: string }) => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -32,15 +40,30 @@ const FormReports = ({ report, status }: { report: any; status: string }) => {
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
-      const response = await axios.put(
-        `/api/reports/daily/${report?.id}`,
-        data
-      );
-      return response.data;
+      setIsLoading(true);
+      if ("start_date" in report) {
+        const response = await axios.put(`/api/reports/weekly/${report?.id}`, {
+          status: "Submit",
+          activity: data?.activity,
+        });
+        return response.data;
+      } else {
+        const response = await axios.put(
+          `/api/reports/daily/${report?.id}`,
+          data
+        );
+        return response.data;
+      }
     } catch (error) {
       throw error;
     } finally {
-      window.location.reload();
+      router.refresh();
+      setIsLoading(false);
+      toast({
+        className: "text-green-600 bg-gray-100",
+        description: "Berhasil menambah logbook!",
+        title: "Sukses",
+      });
     }
   }
   return (
@@ -51,12 +74,16 @@ const FormReports = ({ report, status }: { report: any; status: string }) => {
           className="w-full space-y-6"
         >
           <FormField
-            disabled={status === "Approve" ? true : false}
+            disabled={
+              status === "Approve" || status === "Submit" ? true : false
+            }
             control={form.control}
             name="activity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{dateString(report?.date)}</FormLabel>
+                <FormLabel>
+                  {report?.date ? dateString(report?.date) : "Laporan Mingguan"}
+                </FormLabel>
                 <FormControl>
                   {report?.activity === "" ? (
                     <Textarea placeholder="tuliskan laporan..." {...field} />
@@ -68,7 +95,16 @@ const FormReports = ({ report, status }: { report: any; status: string }) => {
               </FormItem>
             )}
           />
-          {status === "Approve" ? null : <Button type="submit">Submit</Button>}
+          {status === "Approve" || status === "Submit" ? null : isLoading ? (
+            <Button className="w-full" disabled>
+              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              proses ..
+            </Button>
+          ) : (
+            <Button type="submit" size="sm" className="w-full">
+              Submit
+            </Button>
+          )}
         </form>
       </Form>
     </div>
