@@ -1,3 +1,4 @@
+import axios from "axios";
 import Link from "next/link";
 import * as React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
@@ -5,7 +6,6 @@ import AuthLayout from "@/components/layouts/AuthLayout";
 import BadgesCircle from "@/components/badges/circles";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import axios from "axios";
 import { dateMonth } from "@/lib/utils";
 import {
   CheckCheck,

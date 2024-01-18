@@ -1,5 +1,3 @@
-// "use client";
-
 import Link from "next/link";
 import { db } from "@/lib/db";
 import * as React from "react";
@@ -8,6 +6,8 @@ import Hello from "@/components/cards/hello";
 import BasicCard from "@/components/cards/basic";
 import Breadcrumbs from "@/components/breadcrumbs";
 import BadgesCircle from "@/components/badges/circles";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import axios from "axios";
 import Calender from "@/components/calender/page";
@@ -41,7 +41,7 @@ async function getTotalLogbook() {
   };
 }
 
-async function weeklyLogbook(start: string, end: string) {
+async function weeklyLogbook(start: any, end: any) {
   try {
     const res = await axios.get(
       `${process.env.BASE_URL}/reports/recap?start=${start}&end=${end}`
@@ -54,7 +54,7 @@ async function weeklyLogbook(start: string, end: string) {
   }
 }
 
-async function presencesLogbook(start: string, end: string) {
+async function presencesLogbook(start: any, end: any) {
   try {
     const res = await axios.get(
       `${process.env.BASE_URL}/presences/recap?start=${start}&end=${end}`
@@ -68,6 +68,11 @@ async function presencesLogbook(start: string, end: string) {
 }
 
 export default async function Dashboard() {
+  const user = await getServerSession(authOptions);
+  const totalUser = await getTotalUser();
+  const totalDivisi = await getTotalDivisi();
+  const totalLogbook = await getTotalLogbook();
+
   const today = new Date();
   const dayOfWeek = today.getDay();
   const startOfWeek = new Date(
@@ -83,11 +88,8 @@ export default async function Dashboard() {
   const start = startOfWeek.toISOString().split("T")[0];
   const end = endOfWeek.toISOString().split("T")[0];
 
-  const totalUser = await getTotalUser();
-  const totalDivisi = await getTotalDivisi();
-  const totalLogbook = await getTotalLogbook();
-  const getLogbook = await weeklyLogbook(start, end);
-  const getPresences = await presencesLogbook(start, end);
+  const getLogbook = weeklyLogbook(start, end);
+  const getPresences = presencesLogbook(start, end);
   const [logbook, presences] = await Promise.all([getLogbook, getPresences]);
 
   const handleType = (activity: string) => {
