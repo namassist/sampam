@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import React from "react";
 import { DataTable } from "./data-table";
@@ -32,6 +33,7 @@ async function getData(): Promise<User[]> {
     end_at: p.end_at,
   }));
 
+  revalidatePath("/admin/users");
   return pemagangs;
 }
 
