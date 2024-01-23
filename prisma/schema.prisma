@@ -18,6 +18,7 @@ model Users {
 
   pemagang Pemagangs?
   mentor Mentors?
+  penyelia Penyelia?
   @@map("users")
 }
 
@@ -53,6 +54,19 @@ model Mentors {
   @@map("mentors")
 }
 
+model Penyelia {
+  id String @id @default(uuid())
+  user_id String @unique
+  nip String @db.VarChar(100)
+  nama String @db.VarChar(100)
+  bidang String @db.VarChar(100)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@map("penyelias")
+}
+
 model Divisions {
   id String @id @default(uuid())
   name String @db.VarChar(100)
@@ -66,6 +80,7 @@ model Divisions {
 model Presences {
   id String @id @default(uuid())
   status Status?
+  type Type?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   pemagang_id String
@@ -133,6 +148,11 @@ enum Status {
   Hadir
   Sakit
   Ijin
+}
+
+enum Type {
+  Datang
+  Pulang
 }
 
 enum Statuses {

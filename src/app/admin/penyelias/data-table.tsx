@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
-import axios from "axios";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import * as z from "zod";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +41,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PlusCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -48,9 +58,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BiSolidBookContent } from "react-icons/bi";
-import { revalidatePath } from "next/cache";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DataTableProps<TData, TValue> {
@@ -59,21 +67,20 @@ interface DataTableProps<TData, TValue> {
 }
 
 const formSchema = z.object({
-  location: z.string().min(2),
-  status: z.string().min(2),
-  type: z.string().min(2),
+  username: z.string().min(6).max(50),
+  nama: z.string().min(2),
+  nip: z.string().min(8),
+  bidang: z.string().min(1),
 });
 
 export function DataTable<TData, TValue>({
-  id,
   columns,
   data,
-}: DataTableProps<TData, TValue> & { id: any }) {
+}: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const { toast } = useToast();
-  const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-
+  const [open, setOpen] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -97,57 +104,53 @@ export function DataTable<TData, TValue>({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      location: "mainoffice",
-      status: "",
-      type: "",
+      username: "",
+      nama: "",
+      nip: "",
+      bidang: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios.post("/api/presences", {
-        pemagang_id: id,
-        status: values?.status,
-        type: values?.type,
-      });
-
-      if (response?.data?.status === 409) {
-        toast({
-          title: "409 Error",
-          description: response?.data?.message,
-        });
-      }
-
-      if (response?.data?.status === 200) {
-        toast({
-          title: "Sukses",
-          description: "Berhasil melakukan presensi hari ini",
-        });
-        return response.data;
-      }
+      const response = await axios.post("/api/penyelias", values);
+      return response.data;
     } catch (error) {
       console.error("Error creating item:", error);
       throw error;
     } finally {
       router.refresh();
-      setOpen(false);
       setIsLoading(false);
+      setOpen(false);
+      toast({
+        className: "text-green-600 bg-gray-100",
+        title: "Sukses",
+        description: "Berhasil menambah data!",
+      });
     }
   }
 
   return (
     <div>
-      <div className="py-4">
+      <div className="flex justify-between items-center py-4">
+        <Input
+          placeholder="Filter name..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="bg-slate-200">
-              <BiSolidBookContent className="w-4 h-4 mr-2" /> Presensi Harian
+            <Button variant="outline" size="sm">
+              <PlusCircle className="w-4 h-4 mr-2" /> Tambah
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Presensi Harian</DialogTitle>
+              <DialogTitle>Tambah Data Penyelia</DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form
@@ -156,79 +159,68 @@ export function DataTable<TData, TValue>({
               >
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Lokasi</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled
-                      >
-                        <FormControl className="text-xs">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih Lokasi" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="mainoffice">
-                            Main Office
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel className="text-xs">Username</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-xs"
+                          placeholder="Username..."
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="type"
+                  name="nama"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">
-                        Status Kehadiran
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl className="text-xs">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih Tipe Presensi" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Datang">Datang</SelectItem>
-                          <SelectItem value="Pulang">Pulang</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel className="text-xs">Nama</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-xs"
+                          placeholder="Nama..."
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="status"
+                  name="nip"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">
-                        Status Kehadiran
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl className="text-xs">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih status kehadiran" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Hadir">Hadir</SelectItem>
-                          <SelectItem value="Izin">Izin</SelectItem>
-                          <SelectItem value="Sakit">Sakit</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel className="text-xs">NIP</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-xs"
+                          placeholder="NIP..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="bidang"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Bidang</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-xs"
+                          placeholder="Bidang..."
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -240,7 +232,7 @@ export function DataTable<TData, TValue>({
                   </Button>
                 ) : (
                   <Button type="submit" size="sm" className="w-full">
-                    Presensi Sekarang
+                    Submit
                   </Button>
                 )}
               </form>

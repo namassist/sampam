@@ -7,6 +7,7 @@ import React from "react";
 export type Presences = {
   id: string;
   status: "Hadir" | "Ijin" | "Sakit" | null;
+  type: "Datang" | "Pulang" | null;
   createdAt: Date;
 };
 
@@ -55,6 +56,22 @@ export const columns: ColumnDef<Presences>[] = [
         formatted = <Badge className="bg-green-400">{status}</Badge>;
       } else {
         formatted = <Badge className="bg-yellow-400">{status}</Badge>;
+      }
+
+      return formatted;
+    },
+  },
+  {
+    accessorKey: "type",
+    header: "Tipe",
+    cell: ({ row }) => {
+      const status = row.getValue("type") as React.ReactNode;
+      let formatted;
+
+      if (status === "Datang") {
+        formatted = <Badge className="bg-purple-400">{status}</Badge>;
+      } else {
+        formatted = <Badge className="bg-sky-400">{status}</Badge>;
       }
 
       return formatted;

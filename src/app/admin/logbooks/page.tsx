@@ -20,6 +20,7 @@ async function getData(): Promise<User[]> {
           name: true,
         },
       },
+      weeklyReports: true,
     },
   });
 
@@ -31,6 +32,7 @@ async function getData(): Promise<User[]> {
     gender: p.gender,
     start_at: p.start_at,
     end_at: p.end_at,
+    weekly_report: p.weeklyReports,
   }));
 
   revalidatePath("/admin/logbooks");

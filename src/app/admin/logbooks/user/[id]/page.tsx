@@ -2,6 +2,8 @@
 
 import * as z from "zod";
 import axios from "axios";
+import * as React from "react";
+import { useReactToPrint } from "react-to-print";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -41,6 +43,7 @@ import {
 } from "@/components/ui/form";
 import Breadcrumbs from "@/components/breadcrumbs";
 import { useToast } from "@/components/ui/use-toast";
+import Certifications from "@/components/certifications";
 
 const FormSchema = z.object({
   information: z
@@ -78,6 +81,7 @@ interface Daily {
 
 export default function Page() {
   const { toast } = useToast();
+  const componentRef = React.useRef<HTMLInputElement>(null);
   const pathname = usePathname().split("/");
   const userId = pathname[pathname.length - 1];
   const [isLoading, setIsLoading] = useState(false);
@@ -199,12 +203,34 @@ export default function Page() {
     }
   }
 
+  const allReportsApproved = logbook?.reports.every(
+    (report) => report?.status === "Approve"
+  );
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: "Sertifikat",
+    pageStyle: `@media print {
+      @page {
+        size: 210mm 297mm;
+        margin: 0;
+      }
+    }`,
+  });
+
   return (
     <AuthLayout>
-      <div className="flex flex-col items-start p-[18px] bg-white rounded-lg relative my-4">
+      <div className="flex flex-col items-start p-[18px] bg-white rounded-lg relative">
         <h1 className="text-lg font-medium">Logbook {logbook?.name}</h1>
         <Breadcrumbs role="Admin" currentPage="Logbook" />
       </div>
+      {allReportsApproved && (
+        <div className="flex justify-end py-3">
+          <Button variant="destructive" onClick={handlePrint}>
+            Cetak Setifikat
+          </Button>
+        </div>
+      )}
       <div className="bg-white rounded-lg p-[18px] space-y-4">
         {logbook?.reports?.map((report) => (
           <Accordion
@@ -297,6 +323,9 @@ export default function Page() {
             </AccordionItem>
           </Accordion>
         ))}
+      </div>
+      <div className="">
+        <Certifications iref={componentRef} name={logbook?.name || ""} />
       </div>
     </AuthLayout>
   );

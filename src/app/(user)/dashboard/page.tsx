@@ -71,15 +71,14 @@ export default async function Dashboard() {
   const presences = await getPresences(user?.user?.id, startOfWeek, endOfWeek);
 
   const handleDate = (start: any, end: any) => {
-    const today = new Date();
     const start_d = start.getUTCDate();
-    const end_d = end.getUTCDate();
-    const year = today.toLocaleDateString("id-ID", {
+    const end_d = end.toLocaleDateString("id-ID", {
+      day: "2-digit",
       month: "long",
       year: "numeric",
     });
 
-    return `${start_d}-${end_d} ${year}`;
+    return `${start_d}-${end_d}`;
   };
 
   const handleBadge = (status: any) => {

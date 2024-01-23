@@ -32,7 +32,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Divisi",
   },
   {
-    accessorKey: "asal",
+    accessorKey: "place_origin",
     header: "Asal",
   },
   {

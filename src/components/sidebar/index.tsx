@@ -62,22 +62,18 @@ const Sidebar: React.FC<Sidebar> = ({ collapsed, setSidebarCollapsed }) => {
       <div className="flex h-full flex-col overflow-y-auto border-r border-slate-200 bg-white px-3 py-4 dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-10 flex justify-between items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
           {collapsed ? (
-            <button onClick={() => setSidebarCollapsed(!collapsed)}>
-              <Image
-                src="/vercel.svg"
-                alt="logo menu"
-                width={162}
-                height={32}
-              />
+            <button
+              className="mx-auto "
+              onClick={() => setSidebarCollapsed(!collapsed)}
+            >
+              <Image src="/logo.png" alt="logo menu" width={100} height={40} />
             </button>
           ) : (
-            <button onClick={() => setSidebarCollapsed(!collapsed)}>
-              <Image
-                src="/vercel.svg"
-                width={162}
-                height={32}
-                alt="menu logo"
-              />
+            <button
+              className="mx-auto "
+              onClick={() => setSidebarCollapsed(!collapsed)}
+            >
+              <Image src="/logo.png" width={100} height={40} alt="menu logo" />
             </button>
           )}
         </div>

@@ -87,9 +87,13 @@ export default function Login() {
           alt="image"
         />
         <div className="w-full p-6 bg-white rounded-lg shadow-lg">
-          <h1 className="text-xl font-semibold text-gray-500 text-center mt-3 mb-8 uppercase">
-            SAMPAM APP
-          </h1>
+          <div className="flex justify-center items-center mt-3 mb-8 gap-4">
+            <Image src="/logo.png" alt="logo menu" width={40} height={40} />
+            <h1 className="text-xl font-semibold text-gray-500 text-center uppercase">
+              SAMPAM APP
+            </h1>
+            <Image src="/udinus.jpeg" alt="logo menu" width={40} height={40} />
+          </div>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}

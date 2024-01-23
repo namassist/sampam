@@ -31,11 +31,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-const formSchema = z.object({
-  location: z.string().min(2),
-  status: z.string().min(2),
-});
-
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -59,18 +54,6 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      location: "mainoffice",
-      status: "",
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
 
   return (
     <div>

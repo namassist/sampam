@@ -35,32 +35,53 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { status, pemagang_id } = await req.json();
+    const { status, pemagang_id, type } = await req.json();
     const dateObj = new Date();
 
     const start = dateObj.toISOString().split("T")[0] + "T00:00:00.000Z";
     const end = dateObj.toISOString().split("T")[0] + "T23:59:59.999Z";
 
-    const isExist = await db.presences.findFirst({
-      where: {
-        createdAt: {
-          gte: start,
-          lte: end,
+    if (type === "Datang") {
+      const isExist = await db.presences.findFirst({
+        where: {
+          type: "Datang",
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
         },
-      },
-    });
-    console.log(isExist);
-    if (isExist) {
-      return NextResponse.json({
-        status: 409,
-        message: "kamu sudah presensi hari ini!",
       });
+      if (isExist) {
+        return NextResponse.json({
+          status: 409,
+          message: "kamu sudah presensi kedatangan hari ini!",
+        });
+      }
+    }
+
+    if (type === "Pulang") {
+      const isExisting = await db.presences.findFirst({
+        where: {
+          type: "Pulang",
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+      });
+      if (isExisting) {
+        return NextResponse.json({
+          status: 409,
+          message: "kamu sudah presensi Pulang hari ini!",
+        });
+      }
     }
 
     const createdPemagang = await db.presences.create({
       data: {
         status,
         pemagang_id,
+        type,
       },
     });
 

@@ -16,6 +16,7 @@ async function getData(id: any): Promise<Presences[]> {
     select: {
       id: true,
       status: true,
+      type: true,
       createdAt: true,
     },
     orderBy: {
